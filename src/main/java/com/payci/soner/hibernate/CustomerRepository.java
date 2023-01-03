@@ -8,7 +8,7 @@ import javax.transaction.Transactional;
 import com.payci.soner.entities.Customer;
 import com.payci.soner.hibernate.base.BaseRepository;
 
-public class CustomerRepository extends BaseRepository {
+public class CustomerRepository extends BaseRepository<Customer> {
 
 	@Transactional
 	public List<Customer> getAll() {

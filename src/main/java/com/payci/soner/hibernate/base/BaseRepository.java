@@ -12,12 +12,14 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 
+import com.payci.soner.entities.base.BaseEntity;
 
-public abstract class BaseRepository {
+
+public abstract class BaseRepository<T extends BaseEntity> {
 
 	private SessionFactory sessionFactory;
 
-	private Session session;
+	protected Session session;
 	
 	public BaseRepository() {
 		Configuration config = new Configuration();
@@ -31,7 +33,7 @@ public abstract class BaseRepository {
 
 	
 	@Transactional
-	public <T> List<T> getAll(Class<T> entityClass) {
+	public List<T> getAll(Class<T> entityClass) {
 		Transaction transaction = null;
 		List<T> entityRecords = new ArrayList<>();
 		try /*(Session session = sessionFactory.openSession())*/ {
@@ -55,7 +57,7 @@ public abstract class BaseRepository {
 	}
 
 	@Transactional
-	public <T> T get(Class<T> entityClass, long id) {
+	public T get(Class<T> entityClass, long id) {
         Transaction transaction = null;
         T entity = null;
         try /*(/*Session session = sessionFactory.openSession())*/ {
@@ -75,7 +77,7 @@ public abstract class BaseRepository {
         }
     }
 
-	public <T> void save(T entity) {
+	public void save(T entity) {
         Transaction transaction = null;
         try /*(Session session = sessionFactory.openSession())*/ {
             // start a transaction
@@ -92,7 +94,7 @@ public abstract class BaseRepository {
         }
     }
 	
-	public <T> void saveOrUpdate(T entity) {
+	public void saveOrUpdate(T entity) {
         Transaction transaction = null;
         try /*(Session session = sessionFactory.openSession())*/ {
             // start a transaction
@@ -109,7 +111,7 @@ public abstract class BaseRepository {
         }
     }
 
-    public <T> void update(T entity) {
+    public void update(T entity) {
         Transaction transaction = null;
         try /*(Session session = sessionFactory.openSession())*/ {
             // start a transaction
@@ -126,7 +128,7 @@ public abstract class BaseRepository {
         }
     }
 
-    public <T> void delete(T entity) {
+    public void delete(T entity) {
         Transaction transaction = null;
         try /*(Session session = sessionFactory.openSession())*/ {
             // start a transaction
@@ -147,7 +149,7 @@ public abstract class BaseRepository {
         }
     }
 
-    public <T> void deleteById(Class<T> entityClass, long id) {
+    public  void deleteById(Class<T> entityClass, long id) {
         Transaction transaction = null;
         try /*(Session session = sessionFactory.openSession())*/ {
             // start a transaction

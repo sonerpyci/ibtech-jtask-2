@@ -27,7 +27,7 @@
         <mapping class="com.payci.soner.entities.Customer"/>
         <mapping class="com.payci.soner.entities.Phone"/>
 
-        <mapping class="com.payci.soner.entities.reflection.ClassTbl"/>
+        <mapping class="com.payci.soner.entities.reflection.CommandTbl"/>
         <mapping class="com.payci.soner.entities.reflection.MethodTbl"/>
          
     </session-factory>

@@ -16,18 +16,18 @@ import org.hibernate.annotations.Cascade;
 import com.payci.soner.entities.base.BaseEntity;
 
 @Entity
-@Table(name = "ClassTbl")
-public class ClassTbl extends BaseEntity implements Serializable {
+@Table(name = "CommandTbl")
+public class CommandTbl extends BaseEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	public ClassTbl() {}
+	public CommandTbl() {}
 	
-	public ClassTbl(String name, String packageName) {
+	public CommandTbl(String name, String packageName) {
 		this.name = name;
 		this.packageName = packageName;
 	}
 	
-	public ClassTbl(long id, String name, String packageName) {
+	public CommandTbl(long id, String name, String packageName) {
 		this(name, packageName);
 		this.id = id;
 	}
@@ -37,7 +37,7 @@ public class ClassTbl extends BaseEntity implements Serializable {
 	@Column(name = "package_name")
 	private String packageName;
 
-	@OneToMany(mappedBy = "classTbl", cascade = {CascadeType.ALL})
+	@OneToMany(mappedBy = "commandTbl", cascade = {CascadeType.ALL})
 	@Cascade(org.hibernate.annotations.CascadeType.REPLICATE)
 	private List<MethodTbl> methods = new ArrayList<>();
 	
@@ -67,6 +67,6 @@ public class ClassTbl extends BaseEntity implements Serializable {
 
 	public void addMethod(MethodTbl method) {
 		this.methods.add(method);
-		method.setClassTbl(this);
+		method.setCommandTbl(this);
 	}
 }

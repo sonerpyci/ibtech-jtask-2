@@ -1,12 +1,13 @@
-package com.soner.payci.helpers;
+package com.payci.soner.helpers;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import com.payci.soner.hibernate.CustomerRepository;
+import com.payci.soner.entities.base.BaseEntity;
 
 public class ReflectionHelper {
 
@@ -22,10 +23,8 @@ public class ReflectionHelper {
 	
 	public static String SerializeTypes(ArrayList<Class<?>> classTypes) {
 		StringBuilder sb = new StringBuilder();
-		
 		Iterator<Class<?>> iterator = classTypes.iterator();
 		
-		//[ a , b , c]
 		while (iterator.hasNext()) {
 			sb.append(iterator.next().getSimpleName());
 			sb.append(",");
@@ -50,12 +49,11 @@ public class ReflectionHelper {
 		return classTypes;
 	}
 	
-	
 	public static List<Method> getAllMethods(Class<?> cls) {
 		List<Method> suitableMethods = new ArrayList<Method>();
 		do {
 			System.out.println(cls.getSimpleName());
-			suitableMethods.addAll(Arrays.asList(cls.getSuperclass().getMethods()));
+			suitableMethods.addAll(Arrays.asList(cls.getDeclaredMethods()));
 			cls = cls.getSuperclass();
 		} while (cls.getSuperclass() != null && cls.getSuperclass().getSimpleName() != "Object");
 		
@@ -69,7 +67,7 @@ public class ReflectionHelper {
 			// check if list contains desired method.
 			// if method not exists in existing method list, look for super classes until
 			// there is no super class or method found.
-			for(Method method : cls.getSuperclass().getMethods()) {
+			for(Method method : cls.getDeclaredMethods()) {
 				if (method.getName().equals(methodName)) {
 					suitableMethod = method;
 					return suitableMethod;
@@ -81,4 +79,36 @@ public class ReflectionHelper {
 		
 		return suitableMethod;
 	}
+	
+	public static List<String> getParameterNames(Method method) {
+        Parameter[] parameters = method.getParameters();
+        List<String> parameterNames = new ArrayList<>();
+
+        for (Parameter parameter : parameters) {
+            if(parameter.isNamePresent()) {
+            	String parameterName = parameter.getName();
+                parameterNames.add(parameterName);
+            }
+        }
+        return parameterNames;
+    }
+	
+	public static ArrayList<Class<?>> getParameterTypes(Method method) {
+		Class<?>[] parameters = method.getParameterTypes();
+        ArrayList<Class<?>> parameterTypes = new ArrayList<>();
+
+        for (Class<?> parameter : parameters) {
+        	System.out.println(parameter.getName());
+        	parameterTypes.add(parameter);
+        	
+//        	if(parameter.isNamePresent()) {
+//            	 Class<?> parameterType = parameter.getType();
+//                 parameterTypes.add(parameterType);
+//            } else if (parameter.getDeclaringExecutable().getDeclaringClass().getSimpleName().equals("BaseRepository")) {
+//            	Class<?> parameterType = BaseEntity.class;
+//            	
+//            }
+        }
+        return parameterTypes;
+    }
 }

@@ -4,77 +4,101 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
 
 import com.payci.soner.entities.Account;
 import com.payci.soner.entities.Address;
 import com.payci.soner.entities.Customer;
 import com.payci.soner.entities.Phone;
-import com.payci.soner.entities.reflection.ClassTbl;
+import com.payci.soner.entities.reflection.CommandTbl;
 import com.payci.soner.entities.reflection.MethodTbl;
+import com.payci.soner.helpers.ReflectionHelper;
 import com.payci.soner.hibernate.ClassTblRepository;
 import com.payci.soner.hibernate.CustomerRepository;
-import com.soner.payci.helpers.ReflectionHelper;
+import com.payci.soner.hibernate.MethodTblRepository;
 
 public class Main {
 
+	static boolean run = true;
 	public static void main(String[] args) {
-		//initalizeEntities();
+		initializeEntities();
+		initializeRepositoryCommands("com.payci.soner.operations", "Customer");
+		//testReflection();
 		
-//		ArrayList<Class<?>> classTypes = new ArrayList<Class<?>>();
-//		
-//		classTypes.add(String.class);
-//		classTypes.add(List.class);
-//		classTypes.add(ArrayList.class);
-//		classTypes.add(HashMap.class);
-//		classTypes.add(int.class);
-//		
-//		String serializedClassTypes = ClassTypeHelper.SerializeTypes(classTypes);
-//		
-//		System.out.println(serializedClassTypes);
-//		
-//		
-//		classTypes = ClassTypeHelper.DeserializeClassTypes(serializedClassTypes);
-//		
-//		for(Class<?> classType : classTypes){
-//			System.out.println(classType.getSimpleName());
-//		}
+		StringBuilder sb = new StringBuilder();
+		while(run) {
+			try (Scanner scanner = new Scanner(System.in)){
+				System.out.print("Enter CommandName: ");  
+				String commandName = scanner.nextLine();
+				
+				MethodTblRepository methodTblRepository = new MethodTblRepository();
+				MethodTbl methodTbl = methodTblRepository.getByCommandName(commandName);
+				CommandTbl commandTbl = methodTbl.getCommandTbl();
+				String fullClassPath = sb.append(commandTbl.getPackageName())
+						.append('.')
+						.append(commandTbl.getName())
+						.append("Operations").toString();
+				
+				Class<?> cls = ReflectionHelper.ExtractClassType(fullClassPath);
+				Object clsObj = cls.getDeclaredConstructor().newInstance();
+				
+				
+				//Method method = cls.getDeclaredMethod("method name", parameterTypes);
+				Method method = ReflectionHelper.getMethod(cls, methodTbl.getName());
+				
+				List<Class<?>> methodParams = methodTbl.getParameters();
+				
+				Object rv = method.invoke(clsObj);
+				
+				System.out.println(cls);
+			} catch (Exception e) {
+				System.out.println("\nException occured. Try Again."); 
+			}
+		}
+	}
+	
+	private static void initializeRepositoryCommands(String packagePath, String className) {
+		StringBuilder sb = new StringBuilder();
+		String fullClassPath = sb.append(packagePath)
+				.append('.')
+				.append(className)
+				.append("Operations")
+				.toString();
+		sb.setLength(0);
 		
-		Method[] declaredMethods = CustomerRepository.class.getDeclaredMethods();
+		ClassTblRepository classTblRepository = new ClassTblRepository();
 		
-		Class<?> superClass = CustomerRepository.class.getSuperclass();
+		if (classTblRepository.getByName(className) != null)
+			return;
 		
-		Method[] superClassDeclaredMethods = superClass.getDeclaredMethods();
+		CommandTbl repositoryTbl = new CommandTbl(className, packagePath);
+		Class<?> repositoryClass = ReflectionHelper.ExtractClassType(fullClassPath);
 		
+		List<Method> methods = ReflectionHelper.getAllMethods(repositoryClass);
 		
-		
+		for(Method method : methods) {
+			ArrayList<Class<?>> parameterTypesOfMethod = ReflectionHelper.getParameterTypes(method);
+			String commandName = sb.append(className)
+					.append('_')
+					.append(method.getName())
+					.toString();
+			sb.setLength(0);
+			MethodTbl methodTbl = new MethodTbl(method.getName(), commandName, parameterTypesOfMethod);
+			repositoryTbl.addMethod(methodTbl);
+		}
+		classTblRepository.save(repositoryTbl);
+	}
+	
+	
+	private static void testReflection() {
 		for(Method declaredMethod : ReflectionHelper.getAllMethods(CustomerRepository.class)) {
 			System.out.println(declaredMethod);
 		}
-		
-		
+
 		Method singleMethod = ReflectionHelper.getMethod(CustomerRepository.class, "getAll");
 		
 		System.out.println("single method : " + singleMethod);
-		
 	}
-	
-//	private static void initializeCommands() {
-//		ClassTblRepository classTblRepository = new ClassTblRepository();
-//		
-//		ClassTbl customerRepositoryTbl = new ClassTbl("CustomerRepository", "com.payci.soner.hibernate");
-//		customerRepositoryTbl.addMethod(new MethodTbl("getAll", (String)null));
-//		customerRepositoryTbl.addMethod(new MethodTbl("get", "long"));
-//		
-//		
-//		ClassTbl addressTbl = new ClassTbl("Address", "com.payci.soner.entities.reflection");
-//		
-//		
-//		ClassTbl customerTbl = new ClassTbl("Customer", "com.payci.soner.entities.reflection");
-//		
-//		
-//		ClassTbl phoneTbl = new ClassTbl("Phone", "com.payci.soner.entities.reflection");
-//	}
-	
 	
 	private static void initializeEntities() {
 		CustomerRepository customerRepository = new CustomerRepository();

@@ -2,14 +2,16 @@ package com.payci.soner.entities.reflection;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.payci.soner.entities.base.BaseEntity;
-import com.soner.payci.helpers.ReflectionHelper;
+import com.payci.soner.helpers.ReflectionHelper;
 
 @Entity
 @Table(name = "MethodTbl")
@@ -18,24 +20,27 @@ public class MethodTbl extends BaseEntity implements Serializable {
 	
 	public MethodTbl() {}
 	
-	public MethodTbl(String name, ArrayList<Class<?>> parameters) {
+	public MethodTbl(String name, String commandName, ArrayList<Class<?>> parameters) {
 		this.name = name;
+		this.setCommandName(commandName);
 		this.parameters = parameters;
 	}
 	
-	public MethodTbl(long id, String name, String parameters) {
-		this(name, ReflectionHelper.DeserializeClassTypes(parameters));
+	public MethodTbl(long id, String name, String commandName, String parameters) {
+		this(name, commandName, ReflectionHelper.DeserializeClassTypes(parameters));
 		this.id = id;
 	}
 	
-	
 	private String name;
+	
+	@Column(name = "command_name")
+	private String commandName;
 	
 	private ArrayList<Class<?>> parameters;
 	
 	@ManyToOne
     @JoinColumn(name="class_id")
-    private ClassTbl classTbl;
+    private CommandTbl commandTbl;
 
 	public String getName() {
 		return name;
@@ -45,7 +50,15 @@ public class MethodTbl extends BaseEntity implements Serializable {
 		this.name = name;
 	}
 
-	public ArrayList<Class<?>> getParameters() {
+	private String getCommandName() {
+		return commandName;
+	}
+
+	private void setCommandName(String commandName) {
+		this.commandName = commandName;
+	}
+	
+	public List<Class<?>> getParameters() {
 		return parameters;
 	}
 
@@ -53,11 +66,11 @@ public class MethodTbl extends BaseEntity implements Serializable {
 		this.parameters = parameters;
 	}
 
-	public ClassTbl getClassTbl() {
-		return classTbl;
+	public CommandTbl getCommandTbl() {
+		return commandTbl;
 	}
 
-	public void setClassTbl(ClassTbl classTbl) {
-		this.classTbl = classTbl;
+	public void setCommandTbl(CommandTbl commandTbl) {
+		this.commandTbl = commandTbl;
 	}
 }
