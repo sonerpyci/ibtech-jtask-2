@@ -2,7 +2,6 @@ package com.payci.soner;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
@@ -15,54 +14,30 @@ import com.payci.soner.entities.reflection.MethodTbl;
 import com.payci.soner.helpers.ReflectionHelper;
 import com.payci.soner.hibernate.ClassTblRepository;
 import com.payci.soner.hibernate.CustomerRepository;
-import com.payci.soner.hibernate.MethodTblRepository;
 
 public class Main {
-
 	static boolean run = true;
+	static CommandExecuter commandExecuter = new CommandExecuter();
+	
 	public static void main(String[] args) {
-		initializeEntities();
-		initializeRepositoryCommands("com.payci.soner.operations", "Customer");
-		//testReflection();
+		//initializeEntities();
+		initializeCommands("com.payci.soner.operations", "CustomerOperations");
 		
-		StringBuilder sb = new StringBuilder();
-		while(run) {
-			try (Scanner scanner = new Scanner(System.in)){
-				System.out.print("Enter CommandName: ");  
-				String commandName = scanner.nextLine();
-				
-				MethodTblRepository methodTblRepository = new MethodTblRepository();
-				MethodTbl methodTbl = methodTblRepository.getByCommandName(commandName);
-				CommandTbl commandTbl = methodTbl.getCommandTbl();
-				String fullClassPath = sb.append(commandTbl.getPackageName())
-						.append('.')
-						.append(commandTbl.getName())
-						.append("Operations").toString();
-				
-				Class<?> cls = ReflectionHelper.ExtractClassType(fullClassPath);
-				Object clsObj = cls.getDeclaredConstructor().newInstance();
-				
-				
-				//Method method = cls.getDeclaredMethod("method name", parameterTypes);
-				Method method = ReflectionHelper.getMethod(cls, methodTbl.getName());
-				
-				List<Class<?>> methodParams = methodTbl.getParameters();
-				
-				Object rv = method.invoke(clsObj);
-				
-				System.out.println(cls);
-			} catch (Exception e) {
-				System.out.println("\nException occured. Try Again."); 
-			}
+		try (Scanner scanner = new Scanner(System.in)) {
+			System.out.print("Enter CommandName: ");  
+			String commandName = scanner.nextLine();
+			commandExecuter.Execute(commandName);
+		} catch (Exception e) {
+			System.out.println("\nException occured. Try Again."); 
 		}
+		
 	}
 	
-	private static void initializeRepositoryCommands(String packagePath, String className) {
+	private static void initializeCommands(String packagePath, String className) {
 		StringBuilder sb = new StringBuilder();
 		String fullClassPath = sb.append(packagePath)
 				.append('.')
 				.append(className)
-				.append("Operations")
 				.toString();
 		sb.setLength(0);
 		
@@ -88,6 +63,7 @@ public class Main {
 		}
 		classTblRepository.save(repositoryTbl);
 	}
+	
 	
 	
 	private static void testReflection() {
